@@ -48,6 +48,11 @@ button {
   font-weight:bold;
 }
 
+button:disabled {
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
 button:hover { transform:scale(1.03); }
 
 .loader {
@@ -93,8 +98,12 @@ footer {
 
 <div class="container">
   <h1>AI Search 💕</h1>
-  <input id="query" placeholder="Ask me anything...">
-  <button onclick="askAI()">Search ✨</button>
+
+  <!-- ✅ FORM ENABLES ENTER KEY -->
+  <form onsubmit="askAI(event)">
+    <input id="query" placeholder="Ask me anything..." autocomplete="off">
+    <button id="btn" type="submit">Search ✨</button>
+  </form>
 
   <div class="loader" id="loader">Let a girl think...</div>
   <div class="answer" id="answer"></div>
@@ -104,43 +113,60 @@ footer {
 </div>
 
 <script>
-async function askAI(){
-  const q=document.getElementById("query").value;
-  const loader=document.getElementById("loader");
-  const answer=document.getElementById("answer");
-  const sources=document.getElementById("sources");
+document.getElementById("query").focus();   // auto focus
 
-  if(q.trim().length<3){
-    answer.innerText="Type something meaningful bestie 💬";
-    answer.style.display="block";
+async function askAI(event){
+  event.preventDefault();   // STOP page reload
+
+  const q = document.getElementById("query").value;
+  const loader = document.getElementById("loader");
+  const answer = document.getElementById("answer");
+  const sources = document.getElementById("sources");
+  const button = document.getElementById("btn");
+
+  if(q.trim().length < 3){
+    answer.innerText = "Type something meaningful bestie 💬";
+    answer.style.display = "block";
+    sources.style.display="none";
     return;
   }
 
   loader.style.display="block";
   answer.style.display="none";
   sources.style.display="none";
+  button.disabled=true;
+  button.innerText="Thinking... 💭";
 
-  try{
-    let r=await fetch("https://ai-search-agent.onrender.com/ask",{
+  try {
+    const r = await fetch("https://ai-search-agent.onrender.com/ask", {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({question:q})
     });
 
-    let d=await r.json();
+    const d = await r.json();
+
     loader.style.display="none";
+    button.disabled=false;
+    button.innerText="Search ✨";
 
     answer.innerHTML = d.answer.replace(/\n/g,"<br>");
     answer.style.display="block";
 
-    let links=d.sources.map(s=>`<a href="${s.url}" target="_blank">🌸 ${s.title}</a>`).join("");
-    sources.innerHTML=links;
+    let links = d.sources.map(s =>
+      `<a href="${s.url}" target="_blank">🌸 ${s.title}</a>`
+    ).join("");
+    
+    sources.innerHTML = links;
     sources.style.display="block";
 
-  }catch(e){
+  } catch(e) {
     loader.style.display="none";
+    button.disabled=false;
+    button.innerText="Search ✨";
     answer.innerText="Network error bestie 😔";
     answer.style.display="block";
+    console.error(e);
   }
 }
 </script>
