@@ -5,3 +5,7 @@ requests
 openai
 langchain
 langgraph
+groq
+tavily-python
+slowapi
+pydantic
