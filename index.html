@@ -121,7 +121,7 @@ async function askAI(){
   sources.style.display="none";
 
   try{
-    let r=await fetch("http://localhost:8000/ask",{
+    let r=await fetch("https://ai-search-agent.onrender.com/ask",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({question:q})
